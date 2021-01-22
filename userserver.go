@@ -62,8 +62,6 @@ func init() {
 }
 
 func main() {
-	login.LoadPlatformInfo()
-
 	// 1.添加全局中间件
 	if err := service.UseMiddleware(logMiddleware); err != nil {
 		log.Fatalf("Use middleware error : %s", err)
