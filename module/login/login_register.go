@@ -37,7 +37,7 @@ func (lm *loginModule) register(ctx network.Context) {
 	// 绑定用户登录需要验证账号、秘密
 	if request.RegisterType == loginModel.RegisterTypeCustomer {
 		// 账号要求 6-18位，只允许字母数字，不允许数字开头
-		if !regexp.Match("^[a-zA-X]+[a-zA-Z0-9]{5,17}$", request.Account) {
+		if !regexp.Match("^[a-zA-Z]+[a-zA-Z0-9]{5,17}$", request.Account) {
 			printReplyError(ctx.BadRequest("require account length must between 6 - 18"))
 			return
 		}
