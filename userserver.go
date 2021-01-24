@@ -55,7 +55,12 @@ func init() {
 	database.InitializeRedis(time.Minute*time.Duration(5), 10, 5000, "localhost", 6379, "frank123")
 
 	// 初始化 Mongo
-	if err := database.InitializeMongo("localhost", 9000, time.Minute*time.Duration(5), 5000); err != nil {
+	if err := database.InitializeMongo(
+		"frank",
+		"frank123",
+		"jarvis",
+		"localhost",
+		9000, time.Minute*time.Duration(5), 5000); err != nil {
 		log.Panicf("Initialize Mongo error : %s", err.Error())
 		return
 	}
