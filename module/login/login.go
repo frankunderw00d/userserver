@@ -43,9 +43,8 @@ func (lm *loginModule) Name() string {
 // 模块要求实现函数: Route() map[string][]network.RouteHandleFunc
 func (lm *loginModule) Route() map[string][]network.RouteHandleFunc {
 	return map[string][]network.RouteHandleFunc{
-		"register":     {lm.register},       // 注册
-		"authenticate": {lm.authenticate},   // 校验函数
-		"login":        {lm.auth, lm.login}, // 登录函数，前置校验检查中间件
+		"register": {lm.register},       // 注册
+		"login":    {lm.auth, lm.login}, // 登录函数，前置校验检查中间件
 	}
 }
 

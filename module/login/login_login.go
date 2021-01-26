@@ -4,17 +4,7 @@ import (
 	"jarvis/base/network"
 )
 
-var (
-	fakeUserLoginInfo = map[string]string{
-		"frank":  "12345687",
-		"frank1": "123456871",
-		"frank2": "123456872",
-		"frank3": "123456873",
-		"frank4": "123456874",
-		"frank5": "123456875",
-		"frank6": "123456876",
-	}
-)
+var ()
 
 func (lm *loginModule) login(ctx network.Context) {
 	//// 加锁，防止竞态

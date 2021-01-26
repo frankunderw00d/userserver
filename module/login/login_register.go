@@ -4,6 +4,7 @@ import (
 	"baseservice/model/platform"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"jarvis/base/database"
 	"jarvis/base/network"
@@ -20,32 +21,47 @@ func (lm *loginModule) register(ctx network.Context) {
 		return
 	}
 
+	response := &loginModel.RegisterResponse{}
+	err := register(request, response)
+	if err != nil {
+		fmt.Printf("register error : %s", err.Error())
+		printReplyError(ctx.ServerError(err))
+		return
+	}
+
+	data, err := json.Marshal(&response)
+	if err != nil {
+		fmt.Printf("marshal response error : %s", err.Error())
+		printReplyError(ctx.ServerError(err))
+		return
+	}
+
+	printReplyError(ctx.Success(data))
+}
+
+func register(request loginModel.RegisterRequest, response *loginModel.RegisterResponse) error {
 	// 获取 Redis 连接
 	redisConn, err := database.GetRedisConn()
 	if err != nil {
-		printReplyError(ctx.ServerError(err))
-		return
+		return err
 	}
 	defer redisConn.Close()
 
 	// 验证平台号
 	if !platform.HExistsPlatformByID(fmt.Sprintf("%d", request.PlatformID)) {
-		printReplyError(ctx.BadRequest("platform id doesn't exists"))
-		return
+		return errors.New("platform id doesn't exists")
 	}
 
 	// 绑定用户登录需要验证账号、秘密
 	if request.RegisterType == loginModel.RegisterTypeCustomer {
 		// 账号要求 6-18位，只允许字母数字，不允许数字开头
 		if !regexp.Match("^[a-zA-Z]+[a-zA-Z0-9]{5,17}$", request.Account) {
-			printReplyError(ctx.BadRequest("require account length must between 6 - 18"))
-			return
+			return errors.New("require account length must between 6 - 18")
 		}
 
 		// 密码要求 6-18位，只允许字母数字
 		if !regexp.Match("^[a-zA-Z0-9]{6,18}$", request.Password) {
-			printReplyError(ctx.BadRequest("require account length must between 6 - 18"))
-			return
+			return errors.New("require password length must between 6 - 18")
 		}
 	} else {
 		// 随机分配账号密码
@@ -59,8 +75,7 @@ func (lm *loginModule) register(ctx network.Context) {
 	// 获取 MySQL 连接
 	mysqlConn, err := database.GetMySQLConn()
 	if err != nil {
-		printReplyError(ctx.ServerError(err))
-		return
+		return err
 	}
 	defer mysqlConn.Close()
 
@@ -68,21 +83,11 @@ func (lm *loginModule) register(ctx network.Context) {
 		"insert into `dynamic_account`(token,account,password,`type`,platform)values(?,?,?,?,?);",
 		token, request.Account, request.Password, request.RegisterType, request.PlatformID,
 	); err != nil {
-		fmt.Printf("insert into dynamic_account error : %s", err.Error())
-		printReplyError(ctx.ServerError(err))
-		return
+		return err
 	}
 
-	response := loginModel.RegisterResponse{
-		RegisterRequest: request,
-		Token:           token,
-	}
-	data, err := json.Marshal(&response)
-	if err != nil {
-		fmt.Printf("marshal response error : %s", err.Error())
-		printReplyError(ctx.ServerError(err))
-		return
-	}
+	response.RegisterRequest = request
+	response.Token = token
 
-	printReplyError(ctx.Success(data))
+	return nil
 }
