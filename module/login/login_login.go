@@ -5,11 +5,11 @@ import (
 	"baseservice/model/user"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"jarvis/base/database"
 	"jarvis/base/network"
 	uRand "jarvis/util/rand"
-	"log"
 	loginModel "userserver/model/login"
 )
 
@@ -61,16 +61,25 @@ func login(request loginModel.LoginRequest, response *loginModel.LoginResponse) 
 	}
 	defer mysqlConn.Close()
 
-	// 获取用户信息
-	freshUser := user.FreshUser()
-	row := mysqlConn.QueryRowContext(context.Background(), "select id,token,account,type,platform from `jarvis`.`dynamic_account` where account = ? and password = ?",
+	// 验证账号合法性
+	var exist int
+	row := mysqlConn.QueryRowContext(context.Background(), "select count(id) from `jarvis`.`dynamic_account` where account = ? and password = ?",
 		request.Account, request.Password)
-	err = row.Scan(&freshUser.Account.ID, &freshUser.Account.Token, &freshUser.Account.Account, &freshUser.Account.AccountType, &freshUser.Account.Platform)
+	err = row.Scan(&exist)
 	if err != nil {
 		return err
 	}
 
-	log.Printf("%+v", freshUser)
+	// 不存在
+	if exist < 1 {
+		return errors.New("account or password wrong")
+	}
+
+	// 加载用户信息
+	freshUser := user.FreshUser()
+	if err := freshUser.LoadInfoByAccountAndPassword(request.Account, request.Password); err != nil {
+		return err
+	}
 
 	// 生成随机 Session
 	session := uRand.RandomString(8)
@@ -85,6 +94,7 @@ func login(request loginModel.LoginRequest, response *loginModel.LoginResponse) 
 		return err
 	}
 
+	// 返回
 	response.Token = freshUser.Account.Token
 	response.Session = session
 

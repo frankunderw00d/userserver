@@ -2,7 +2,7 @@ package login
 
 import (
 	"baseservice/model/platform"
-	"context"
+	"baseservice/model/user"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -67,22 +67,16 @@ func register(request loginModel.RegisterRequest) error {
 	// 生成唯一 token
 	token := rand.RandomString(16)
 
-	// 获取 MySQL 连接
-	mysqlConn, err := database.GetMySQLConn()
-	if err != nil {
+	freshUser := user.FreshUser()
+	freshUser.Account.Token = token
+	freshUser.Account.Account = request.Account
+	freshUser.Account.Password = request.Password
+	freshUser.Account.AccountType = request.RegisterType
+	freshUser.Account.Platform = request.PlatformID
+	freshUser.Info.Name = rand.RandomString(10)
+	if err := freshUser.Store(); err != nil {
 		return err
 	}
-	defer mysqlConn.Close()
-
-	if _, err := mysqlConn.ExecContext(context.Background(),
-		"insert into `dynamic_account`(token,account,password,`type`,platform)values(?,?,?,?,?);",
-		token, request.Account, request.Password, request.RegisterType, request.PlatformID,
-	); err != nil {
-		return err
-	}
-
-	//response.RegisterRequest = request
-	//response.Token = token
 
 	return nil
 }
