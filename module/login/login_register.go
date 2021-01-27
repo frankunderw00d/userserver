@@ -15,31 +15,26 @@ import (
 
 // 注册
 func (lm *loginModule) register(ctx network.Context) {
+	// 反序列化数据
 	request := loginModel.RegisterRequest{}
 	if err := json.Unmarshal(ctx.Request().Data, &request); err != nil {
 		printReplyError(ctx.ServerError(err))
 		return
 	}
 
-	response := &loginModel.RegisterResponse{}
-	err := register(request, response)
+	// 调用业务函数
+	err := register(request)
 	if err != nil {
 		fmt.Printf("register error : %s", err.Error())
 		printReplyError(ctx.ServerError(err))
 		return
 	}
 
-	data, err := json.Marshal(&response)
-	if err != nil {
-		fmt.Printf("marshal response error : %s", err.Error())
-		printReplyError(ctx.ServerError(err))
-		return
-	}
-
-	printReplyError(ctx.Success(data))
+	// 返回响应
+	printReplyError(ctx.Success([]byte("Register succeed")))
 }
 
-func register(request loginModel.RegisterRequest, response *loginModel.RegisterResponse) error {
+func register(request loginModel.RegisterRequest) error {
 	// 获取 Redis 连接
 	redisConn, err := database.GetRedisConn()
 	if err != nil {
@@ -86,8 +81,8 @@ func register(request loginModel.RegisterRequest, response *loginModel.RegisterR
 		return err
 	}
 
-	response.RegisterRequest = request
-	response.Token = token
+	//response.RegisterRequest = request
+	//response.Token = token
 
 	return nil
 }

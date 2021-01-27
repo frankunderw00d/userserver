@@ -9,11 +9,11 @@ type (
 		RegisterType int    `json:"register_type"` // 注册类型 0-游客 1-绑定用户
 	}
 
-	// 注册请求
-	RegisterResponse struct {
-		RegisterRequest
-		Token string `json:"token"` // 账号绑定 token，内部分配唯一标识
-	}
+	//// 注册响应
+	//RegisterResponse struct {
+	//	RegisterRequest
+	//	Token string `json:"-"` // 账号绑定 token，内部分配唯一标识
+	//}
 )
 
 const (

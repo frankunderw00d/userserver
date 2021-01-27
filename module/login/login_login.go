@@ -1,54 +1,109 @@
 package login
 
 import (
+	"baseservice/base/basic"
+	"baseservice/model/user"
+	"context"
+	"encoding/json"
+	"fmt"
+	"jarvis/base/database"
 	"jarvis/base/network"
+	uRand "jarvis/util/rand"
+	"log"
+	loginModel "userserver/model/login"
 )
 
 var ()
 
+const (
+	UsersInfoKey                      = "UsersInfo"
+	UserInfoField basic.ComposeString = "User:"
+)
+
+var ()
+
+// 登录
 func (lm *loginModule) login(ctx network.Context) {
-	//// 加锁，防止竞态
-	//lm.userMapMute.Lock()
-	//defer lm.userMapMute.Unlock()
-	//
-	//// 反序列化
-	//request := loginModel.LoginReq{}
-	//if err := json.Unmarshal(ctx.Request().Data, &request); err != nil {
-	//	printReplyError(ctx.Error(err))
-	//	return
-	//}
-	//
-	//// 校验信息
-	//if request.Account == "" {
-	//	printReplyError(ctx.Error(ctx.Reply(ctx.Request().ID, ctx.Request().Reply, []byte("account can't be nil"))))
-	//	return
-	//}
-	//
-	//password, exist := fakeUserLoginInfo[request.Account]
-	//if !exist {
-	//	printReplyError(ctx.Error(ctx.Reply(ctx.Request().ID, ctx.Request().Reply, []byte("account doesn't exist"))))
-	//	return
-	//}
-	//
-	//if request.Password != password {
-	//	printReplyError(ctx.Error(ctx.Reply(ctx.Request().ID, ctx.Request().Reply, []byte("token error"))))
-	//	return
-	//}
-	//
-	//// 确认连接的真实性，如果中途意外下线，即 lm.userMap 中没有，此消息将会不处理
-	//if _, exist := lm.userMap[ctx.Request().ID]; !exist {
-	//	return
-	//}
-	//
-	//// 发送响应
-	//response := loginModel.LoginRsp{
-	//	Session: rand.RandomString(32),
-	//}
-	//rspData, err := json.Marshal(&response)
-	//if err != nil {
-	//	printReplyError(ctx.Error(err))
-	//	return
-	//}
-	//
-	//printReplyError(ctx.Reply(ctx.Request().ID, ctx.Request().Reply, rspData))
+	// 反序列化数据
+	request := loginModel.LoginRequest{}
+	if err := json.Unmarshal(ctx.Request().Data, &request); err != nil {
+		printReplyError(ctx.ServerError(err))
+		return
+	}
+
+	// 实例化响应
+	response := &loginModel.LoginResponse{}
+	// 调用函数
+	err := login(request, response)
+	if err != nil {
+		fmt.Printf("login error : %s", err.Error())
+		printReplyError(ctx.ServerError(err))
+		return
+	}
+
+	// 序列化响应
+	data, err := json.Marshal(response)
+	if err != nil {
+		fmt.Printf("marshal response error : %s", err.Error())
+		printReplyError(ctx.ServerError(err))
+		return
+	}
+
+	// 返回响应
+	printReplyError(ctx.Success(data))
+}
+
+func login(request loginModel.LoginRequest, response *loginModel.LoginResponse) error {
+	// 获取 MySQL 连接
+	mysqlConn, err := database.GetMySQLConn()
+	if err != nil {
+		return err
+	}
+	defer mysqlConn.Close()
+
+	// 获取用户信息
+	freshUser := user.FreshUser()
+	row := mysqlConn.QueryRowContext(context.Background(), "select id,token,account,type,platform from `jarvis`.`dynamic_account` where account = ? and password = ?",
+		request.Account, request.Password)
+	err = row.Scan(&freshUser.Account.ID, &freshUser.Account.Token, &freshUser.Account.Account, &freshUser.Account.AccountType, &freshUser.Account.Platform)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("%+v", freshUser)
+
+	// 生成随机 Session
+	session := uRand.RandomString(8)
+
+	// 存入用户信息到 redis
+	if err := SetUserInfoToRedis(freshUser); err != nil {
+		return err
+	}
+
+	// 存入用户 Session 到 redis
+	if err := SetSession(freshUser.Account.Token, session); err != nil {
+		return err
+	}
+
+	response.Token = freshUser.Account.Token
+	response.Session = session
+
+	return nil
+}
+
+func SetUserInfoToRedis(u user.User) error {
+	// 获取 Redis 连接
+	redisConn, err := database.GetRedisConn()
+	if err != nil {
+		return err
+	}
+	defer redisConn.Close()
+
+	userData, err := json.Marshal(&u)
+	if err != nil {
+		return err
+	}
+
+	_, err = redisConn.Do("hset", UsersInfoKey, UserInfoField.Compose(u.Account.Token), string(userData))
+	return err
 }
