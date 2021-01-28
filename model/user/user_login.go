@@ -1,4 +1,4 @@
-package login
+package user
 
 type (
 	LoginRequest struct {
@@ -7,7 +7,7 @@ type (
 	}
 
 	LoginResponse struct {
-		Token   string `json:"token"`
-		Session string `json:"session"`
+		Token    string    `json:"token"`
+		Session  string    `json:"session"`
 	}
 )

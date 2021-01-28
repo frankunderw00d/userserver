@@ -1,4 +1,4 @@
-package login
+package user
 
 type (
 	// 注册请求

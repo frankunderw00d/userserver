@@ -1,4 +1,4 @@
-package login
+package user
 
 import (
 	"baseservice/base/basic"
@@ -10,7 +10,7 @@ import (
 	"jarvis/base/database"
 	"jarvis/base/network"
 	uRand "jarvis/util/rand"
-	loginModel "userserver/model/login"
+	loginModel "userserver/model/user"
 )
 
 var ()
@@ -23,7 +23,9 @@ const (
 var ()
 
 // 登录
-func (lm *loginModule) login(ctx network.Context) {
+// 登录函数为所有函数的前提
+// 因此登录函数强制刷新 redis 账号绑定的 Session 和 用户信息
+func (um *userModule) login(ctx network.Context) {
 	// 反序列化数据
 	request := loginModel.LoginRequest{}
 	if err := json.Unmarshal(ctx.Request().Data, &request); err != nil {
@@ -36,7 +38,7 @@ func (lm *loginModule) login(ctx network.Context) {
 	// 调用函数
 	err := login(request, response)
 	if err != nil {
-		fmt.Printf("login error : %s", err.Error())
+		fmt.Printf("user error : %s", err.Error())
 		printReplyError(ctx.ServerError(err))
 		return
 	}
@@ -101,6 +103,7 @@ func login(request loginModel.LoginRequest, response *loginModel.LoginResponse) 
 	return nil
 }
 
+// 将用户信息存入 redis
 func SetUserInfoToRedis(u user.User) error {
 	// 获取 Redis 连接
 	redisConn, err := database.GetRedisConn()

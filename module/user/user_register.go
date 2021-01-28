@@ -1,4 +1,4 @@
-package login
+package user
 
 import (
 	"baseservice/model/platform"
@@ -10,11 +10,11 @@ import (
 	"jarvis/base/network"
 	"jarvis/util/rand"
 	"jarvis/util/regexp"
-	loginModel "userserver/model/login"
+	loginModel "userserver/model/user"
 )
 
 // 注册
-func (lm *loginModule) register(ctx network.Context) {
+func (um *userModule) register(ctx network.Context) {
 	// 反序列化数据
 	request := loginModel.RegisterRequest{}
 	if err := json.Unmarshal(ctx.Request().Data, &request); err != nil {

@@ -1,28 +1,80 @@
-/*
-	HashMap UsersSession User:Token Session:Time
-*/
-package login
+package user
 
 import (
 	"baseservice/base/basic"
+	"encoding/json"
 	redisGo "github.com/gomodule/redigo/redis"
 	"jarvis/base/database"
 	"jarvis/base/network"
+	uRand "jarvis/util/rand"
 	"strings"
 	"time"
+	loginModel "userserver/model/user"
 )
 
 type ()
 
 const (
-	UsersSessionKey                       = "UsersSession"
+	// 用户 Session 键
+	UsersSessionKey = "UsersSession"
+	// 用户 Session 列键
 	UsersSessionField basic.ComposeString = "User:"
+	// 上下文传递额外信息键
+	ContextExtraSessionKey = "Session"
 )
 
 var ()
 
-func (lm *loginModule) auth(ctx network.Context) {
+func (um *userModule) auth(ctx network.Context) {
+	// 反序列化数据
+	request := loginModel.AuthTypeRequest{}
+	if err := json.Unmarshal(ctx.Request().Data, &request); err != nil {
+		printReplyError(ctx.ServerError(err))
+		ctx.Done()
+		return
+	}
 
+	// 根据 request.Token 取得 Session
+	redisSession, err := GetSession(request.Token)
+	if err != nil {
+		printReplyError(ctx.ServerError(err))
+		ctx.Done()
+		return
+	}
+
+	// 核对 Session 和 secretKey
+	if redisSession != request.Session {
+		printReplyError(ctx.BadRequest("session wrong"))
+		ctx.Done()
+		return
+	}
+	if basic.EncryptSecretKey(request.Token, redisSession) != request.SecretKey {
+		printReplyError(ctx.BadRequest("secretKey wrong"))
+		ctx.Done()
+		return
+	}
+
+	// 核对 Session 是否超时，超时则更换，存入 Redis 且返回给用户
+	timeout, err := CheckSessionTimeout(request.Token)
+	if err != nil {
+		printReplyError(ctx.ServerError(err))
+		ctx.Done()
+		return
+	}
+
+	if timeout {
+		// 生成随机 Session
+		session := uRand.RandomString(8)
+		err := SetSession(request.Token, session)
+		if err != nil {
+			printReplyError(ctx.ServerError(err))
+			ctx.Done()
+			return
+		}
+
+		// 在调用链中传递额外信息
+		ctx.SetExtra(ContextExtraSessionKey, session)
+	}
 }
 
 // 设置 Session
@@ -79,7 +131,7 @@ func CheckSessionTimeout(token string) (bool, error) {
 		return false, err
 	}
 
-	if time.Now().Sub(p).Minutes() >= -15 {
+	if time.Now().Sub(p).Minutes() >= 15 {
 		return true, nil
 	}
 

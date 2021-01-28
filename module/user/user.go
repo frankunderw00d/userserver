@@ -1,4 +1,4 @@
-package login
+package user
 
 import (
 	"jarvis/base/network"
@@ -7,52 +7,55 @@ import (
 
 type (
 	// 模块定义
-	loginModule struct{}
+	userModule struct{}
 )
 
 const (
 	// 模块名常量定义
-	ModuleName = "Login"
+	ModuleName = "User"
 )
 
 var (
 	// 默认模块，由于需要同时充当观察者和模块，所以默认一个模块来支持不同的接口
-	defaultLoginModule *loginModule
+	defaultUserModule *userModule
 )
 
 func init() {
 	// 实例化默认模块
-	defaultLoginModule = &loginModule{}
+	defaultUserModule = &userModule{}
 }
 
 // 将默认模块声明为观察者
 func NewObserver() network.Observer {
-	return defaultLoginModule
+	return defaultUserModule
 }
 
 // 将默认模块声明为模块
 func NewModule() network.Module {
-	return defaultLoginModule
+	return defaultUserModule
 }
 
 // 模块要求实现函数: Name() string
-func (lm *loginModule) Name() string {
+func (um *userModule) Name() string {
 	return ModuleName
 }
 
 // 模块要求实现函数: Route() map[string][]network.RouteHandleFunc
-func (lm *loginModule) Route() map[string][]network.RouteHandleFunc {
+func (um *userModule) Route() map[string][]network.RouteHandleFunc {
 	return map[string][]network.RouteHandleFunc{
-		"register": {lm.register}, // 注册
-		"login":    {lm.login},    // 登录
+		"register":             {um.register},                      // 用户注册
+		"user":                {um.login},                         // 用户登录
+		"getUserInfo":          {um.auth, um.getUserInfo},          // 获取用户信息
+		"updateUserInfo":       {um.auth, um.updateUserInfo},       // 更新用户信息
+		"updateAccountBalance": {um.auth, um.updateAccountBalance}, // 更新用户账户余额
 	}
 }
 
 // 观察者要求实现函数: ObserveConnect(string)
-func (lm *loginModule) ObserveConnect(id string) {}
+func (um *userModule) ObserveConnect(id string) {}
 
 // 观察者要求实现函数: ObserveDisconnect(string)
-func (lm *loginModule) ObserveDisconnect(id string) {}
+func (um *userModule) ObserveDisconnect(id string) {}
 
 // 打印回复错误
 func printReplyError(err error) {

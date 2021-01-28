@@ -3,12 +3,13 @@ module userserver
 go 1.14
 
 require (
-	github.com/gomodule/redigo v1.8.3
-	jarvis v1.0.1
 	baseservice v1.0.1
+	github.com/gomodule/redigo v1.8.3
+	go.mongodb.org/mongo-driver v1.4.5
+	jarvis v1.0.1
 )
 
 replace (
-    jarvis v1.0.1 => /home/frank/Documents/project/jarvis
-    baseservice v1.0.1 => /home/frank/Documents/project/baseservice
+	baseservice v1.0.1 => /home/frank/Documents/project/baseservice
+	jarvis v1.0.1 => /home/frank/Documents/project/jarvis
 )

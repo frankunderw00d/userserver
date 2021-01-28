@@ -9,7 +9,7 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
-	"userserver/module/login"
+	"userserver/module/user"
 )
 
 const (
@@ -74,13 +74,13 @@ func main() {
 	}
 
 	// 2.注册观察者
-	if err := service.RegisterObserver(login.NewObserver()); err != nil {
+	if err := service.RegisterObserver(user.NewObserver()); err != nil {
 		log.Fatalf("Register observer error : %s", err)
 		return
 	}
 
 	// 3.注册模块
-	if err := service.RegisterModule(login.NewModule()); err != nil {
+	if err := service.RegisterModule(user.NewModule()); err != nil {
 		log.Fatalf("Register module error : %s", err)
 		return
 	}
