@@ -39,7 +39,7 @@ func (um *userModule) updateAccountBalance(ctx network.Context) {
 	// 调用函数
 	err := updateAccountBalance(request, response)
 	if err != nil {
-		fmt.Printf("user error : %s", err.Error())
+		fmt.Printf("update account balance error : %s", err.Error())
 		printReplyError(ctx.ServerError(err))
 		return
 	}

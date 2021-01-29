@@ -24,7 +24,7 @@ func (um *userModule) getUserInfo(ctx network.Context) {
 	// 调用函数
 	err := getUserInfo(request, response)
 	if err != nil {
-		fmt.Printf("user error : %s", err.Error())
+		fmt.Printf("get user info error : %s", err.Error())
 		printReplyError(ctx.ServerError(err))
 		return
 	}

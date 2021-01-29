@@ -38,7 +38,7 @@ func (um *userModule) login(ctx network.Context) {
 	// 调用函数
 	err := login(request, response)
 	if err != nil {
-		fmt.Printf("user error : %s", err.Error())
+		fmt.Printf("login error : %s", err.Error())
 		printReplyError(ctx.ServerError(err))
 		return
 	}

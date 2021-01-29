@@ -37,7 +37,7 @@ func (um *userModule) updateUserInfo(ctx network.Context) {
 	// 调用函数
 	err := updateUserInfo(request, response)
 	if err != nil {
-		fmt.Printf("user error : %s", err.Error())
+		fmt.Printf("update user info error : %s", err.Error())
 		printReplyError(ctx.ServerError(err))
 		return
 	}
