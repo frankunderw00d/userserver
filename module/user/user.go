@@ -44,7 +44,7 @@ func (um *userModule) Name() string {
 func (um *userModule) Route() map[string][]network.RouteHandleFunc {
 	return map[string][]network.RouteHandleFunc{
 		"register":             {um.register},                      // 用户注册
-		"user":                {um.login},                         // 用户登录
+		"login":                {um.login},                         // 用户登录
 		"getUserInfo":          {um.auth, um.getUserInfo},          // 获取用户信息
 		"updateUserInfo":       {um.auth, um.updateUserInfo},       // 更新用户信息
 		"updateAccountBalance": {um.auth, um.updateAccountBalance}, // 更新用户账户余额
