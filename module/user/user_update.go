@@ -12,7 +12,15 @@ import (
 )
 
 const (
-	UserInfoUpdateDistributedLock basic.ComposeString = "UserInfoUpdateDisLock:"
+	// 用户信息分布式锁名
+	InfoUpdateDistributedLock basic.ComposeString = "UserInfoUpdateDisLock:"
+	// 更新用户信息分布式加锁失败文字
+	ErrInfoUpdateDistributedLockText = "information update distributed lock failure"
+)
+
+var (
+	// 更新用户信息分布式加锁失败
+	ErrInfoUpdateDistributedLock = errors.New(ErrInfoUpdateDistributedLockText)
 )
 
 // 更新用户信息(除了用户 vip 等级,账号余额)
@@ -62,10 +70,10 @@ func updateUserInfo(request loginModel.UpdateRequest, response *loginModel.Updat
 	defer redisLock.Close()
 
 	// 上锁
-	if !redisLock.Lock(UserInfoUpdateDistributedLock.Compose(request.Token), 7) {
-		return errors.New("distributed lock failure")
+	if !redisLock.Lock(InfoUpdateDistributedLock.Compose(request.Token), 7) {
+		return ErrInfoUpdateDistributedLock
 	}
-	defer redisLock.UnLock(UserInfoUpdateDistributedLock.Compose(request.Token))
+	defer redisLock.UnLock(InfoUpdateDistributedLock.Compose(request.Token))
 
 	// 加载用户信息
 	freshUser := user.FreshUser()

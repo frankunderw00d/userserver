@@ -15,7 +15,15 @@ import (
 )
 
 const (
-	UserAccountBalanceUpdateDistributedLock basic.ComposeString = "UserAccountBalanceUpdateDisLock:"
+	// 用户余额分布式锁名
+	AccountBalanceUpdateDistributedLock basic.ComposeString = "UserAccountBalanceUpdateDisLock:"
+	// 更新用户余额分布式加锁失败文字
+	ErrAccountBalanceUpdateDistributedLockText = "account balance update distributed lock failure"
+)
+
+var (
+	// 更新用户余额分布式加锁失败
+	ErrAccountBalanceUpdateDistributedLock = errors.New(ErrAccountBalanceUpdateDistributedLockText)
 )
 
 func (um *userModule) updateAccountBalance(ctx network.Context) {
@@ -64,10 +72,10 @@ func updateAccountBalance(request loginModel.UpdateAccountBalanceRequest, respon
 	defer redisLock.Close()
 
 	// 上锁
-	if !redisLock.Lock(UserAccountBalanceUpdateDistributedLock.Compose(request.Token), 7) {
-		return errors.New("distributed lock failure")
+	if !redisLock.Lock(AccountBalanceUpdateDistributedLock.Compose(request.Token), 5) {
+		return ErrAccountBalanceUpdateDistributedLock
 	}
-	defer redisLock.UnLock(UserAccountBalanceUpdateDistributedLock.Compose(request.Token))
+	defer redisLock.UnLock(AccountBalanceUpdateDistributedLock.Compose(request.Token))
 
 	// 加载用户信息
 	freshUser := user.FreshUser()
@@ -93,7 +101,12 @@ func updateAccountBalance(request loginModel.UpdateAccountBalanceRequest, respon
 	if err != nil {
 		return err
 	}
-	_, err = collection.InsertOne(context.Background(), bson.M{"amount": request.Amount, "time": time.Now().Format("2006-01-02 15:04:05"), "describe": request.Describe})
+	_, err = collection.InsertOne(context.Background(), bson.M{
+		"amount":   request.Amount,
+		"time":     time.Now().Format("2006-01-02 15:04:05"),
+		"describe": request.Describe,
+		"user":     request.Token},
+	)
 	if err != nil {
 		return err
 	}

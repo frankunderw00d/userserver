@@ -67,6 +67,7 @@ func getUserInfo(request loginModel.GetUserInfoRequest, response *loginModel.Get
 	return nil
 }
 
+// 根据 token 从 redis 中获取用户数据
 func GetUserInfoFromRedis(token string) (user.User, error) {
 	// 获取 Redis 连接
 	redisConn, err := database.GetRedisConn()
