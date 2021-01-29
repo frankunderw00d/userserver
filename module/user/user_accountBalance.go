@@ -68,14 +68,17 @@ func updateAccountBalance(request loginModel.UpdateAccountBalanceRequest, respon
 	defer redisConn.Close()
 
 	// 新建 redis 分布式锁
-	redisLock := database.NewRedisLock(redisConn, 10)
+	redisLock := database.NewRedisLock()
+	if err := redisLock.Initialize(); err != nil {
+		return err
+	}
 	defer redisLock.Close()
 
 	// 上锁
-	if !redisLock.Lock(AccountBalanceUpdateDistributedLock.Compose(request.Token), 5) {
+	if !redisLock.UntilLock(AccountBalanceUpdateDistributedLock.Compose(request.Token), 10) {
 		return ErrAccountBalanceUpdateDistributedLock
 	}
-	defer redisLock.UnLock(AccountBalanceUpdateDistributedLock.Compose(request.Token))
+	defer redisLock.Unlock(AccountBalanceUpdateDistributedLock.Compose(request.Token))
 
 	// 加载用户信息
 	freshUser := user.FreshUser()

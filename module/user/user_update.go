@@ -66,14 +66,17 @@ func updateUserInfo(request loginModel.UpdateRequest, response *loginModel.Updat
 	defer redisConn.Close()
 
 	// 新建 redis 分布式锁
-	redisLock := database.NewRedisLock(redisConn, 10)
+	redisLock := database.NewRedisLock()
+	if err := redisLock.Initialize(); err != nil {
+		return err
+	}
 	defer redisLock.Close()
 
 	// 上锁
-	if !redisLock.Lock(InfoUpdateDistributedLock.Compose(request.Token), 7) {
+	if !redisLock.UntilLock(InfoUpdateDistributedLock.Compose(request.Token),10) {
 		return ErrInfoUpdateDistributedLock
 	}
-	defer redisLock.UnLock(InfoUpdateDistributedLock.Compose(request.Token))
+	defer redisLock.Unlock(InfoUpdateDistributedLock.Compose(request.Token))
 
 	// 加载用户信息
 	freshUser := user.FreshUser()
