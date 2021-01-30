@@ -2,6 +2,7 @@ package user
 
 import (
 	"baseservice/base/basic"
+	"baseservice/model/authenticate"
 	"baseservice/model/user"
 	"encoding/json"
 	"errors"
@@ -42,7 +43,7 @@ func (um *userModule) updateUserInfo(ctx network.Context) {
 		return
 	}
 
-	newSession := ctx.Extra(ContextExtraSessionKey, "")
+	newSession := ctx.Extra(authenticate.ContextExtraSessionKey, "")
 	response.Session = newSession.(string)
 
 	// 序列化响应

@@ -1,14 +1,16 @@
 package user
 
+import "baseservice/model/authenticate"
+
 type (
 	// 获取用户信息(除了用户 vip 等级,账号余额)请求
 	GetUserInfoRequest struct {
-		AuthTypeRequest
+		authenticate.Request
 	}
 
 	// 获取用户信息(除了用户 vip 等级,账号余额)响应
 	GetUserInfoResponse struct {
-		AuthTypeResponse
+		authenticate.Response
 		AccountType       int    `json:"type"`                 // 账号类型 0-游客 1-绑定用户
 		Platform          int    `json:"platform"`             // 所属平台
 		Name              string `json:"name"`                 // 用户名

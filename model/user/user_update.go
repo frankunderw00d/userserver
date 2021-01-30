@@ -1,9 +1,11 @@
 package user
 
+import "baseservice/model/authenticate"
+
 type (
 	// 更新用户信息(除了用户 vip 等级,账号余额)请求
 	UpdateRequest struct {
-		AuthTypeRequest
+		authenticate.Request
 		Name              string `json:"name"`                 // 用户名
 		Age               int    `json:"age"`                  // 用户年龄
 		Sex               bool   `json:"sex"`                  // 用户性别

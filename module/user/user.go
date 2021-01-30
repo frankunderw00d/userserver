@@ -1,6 +1,7 @@
 package user
 
 import (
+	"baseservice/model/authenticate"
 	"jarvis/base/network"
 	"log"
 )
@@ -43,11 +44,11 @@ func (um *userModule) Name() string {
 // 模块要求实现函数: Route() map[string][]network.RouteHandleFunc
 func (um *userModule) Route() map[string][]network.RouteHandleFunc {
 	return map[string][]network.RouteHandleFunc{
-		"register":             {um.register},                      // 用户注册
-		"login":                {um.login},                         // 用户登录
-		"getUserInfo":          {um.auth, um.getUserInfo},          // 获取用户信息
-		"updateUserInfo":       {um.auth, um.updateUserInfo},       // 更新用户信息
-		"updateAccountBalance": {um.auth, um.updateAccountBalance}, // 更新用户账户余额
+		"register":             {um.register},                                        // 用户注册
+		"login":                {um.login},                                           // 用户登录
+		"getUserInfo":          {authenticate.Authenticate, um.getUserInfo},          // 获取用户信息(需要校验 Session )
+		"updateUserInfo":       {authenticate.Authenticate, um.updateUserInfo},       // 更新用户信息(需要校验 Session )
+		"updateAccountBalance": {authenticate.Authenticate, um.updateAccountBalance}, // 更新用户账户余额(需要校验 Session )
 	}
 }
 

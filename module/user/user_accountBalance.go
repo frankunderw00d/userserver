@@ -2,6 +2,7 @@ package user
 
 import (
 	"baseservice/base/basic"
+	"baseservice/model/authenticate"
 	"baseservice/model/user"
 	"context"
 	"encoding/json"
@@ -44,7 +45,7 @@ func (um *userModule) updateAccountBalance(ctx network.Context) {
 		return
 	}
 
-	newSession := ctx.Extra(ContextExtraSessionKey, "")
+	newSession := ctx.Extra(authenticate.ContextExtraSessionKey, "")
 	response.Session = newSession.(string)
 
 	// 序列化响应
