@@ -58,6 +58,9 @@ func (um *userModule) ObserveConnect(id string) {}
 // 观察者要求实现函数: ObserveDisconnect(string)
 func (um *userModule) ObserveDisconnect(id string) {}
 
+// 观察者要求实现函数: InitiativeSend(network.Context)
+func (um *userModule) InitiativeSend(ctx network.Context) {}
+
 // 打印回复错误
 func printReplyError(err error) {
 	if err == nil {
