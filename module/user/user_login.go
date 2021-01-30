@@ -1,6 +1,8 @@
 package user
 
 import (
+	bSession "baseservice/base/session"
+
 	"baseservice/base/basic"
 	"baseservice/model/user"
 	"context"
@@ -92,7 +94,7 @@ func login(request loginModel.LoginRequest, response *loginModel.LoginResponse) 
 	}
 
 	// 存入用户 Session 到 redis
-	if err := SetSession(freshUser.Account.Token, session); err != nil {
+	if err := bSession.SetSession(freshUser.Account.Token, session); err != nil {
 		return err
 	}
 
