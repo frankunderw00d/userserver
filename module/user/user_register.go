@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"jarvis/base/database"
 	"jarvis/base/network"
 	"jarvis/util/rand"
 	"jarvis/util/regexp"
@@ -35,13 +34,6 @@ func (um *userModule) register(ctx network.Context) {
 }
 
 func register(request loginModel.RegisterRequest) error {
-	// 获取 Redis 连接
-	redisConn, err := database.GetRedisConn()
-	if err != nil {
-		return err
-	}
-	defer redisConn.Close()
-
 	// 验证平台号
 	if !platform.HExistsPlatformByID(fmt.Sprintf("%d", request.PlatformID)) {
 		return errors.New("platform id doesn't exists")

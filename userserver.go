@@ -2,6 +2,7 @@ package main
 
 import (
 	"jarvis/base/database"
+	"jarvis/base/database/redis"
 	"jarvis/base/network"
 	"log"
 	"os"
@@ -51,7 +52,7 @@ func init() {
 	database.SetUpMySQL(time.Minute*time.Duration(5), 10, 5000)
 
 	// 初始化 Redis
-	database.InitializeRedis(time.Minute*time.Duration(5), 10, 5000, "redis-service", 6379, "frank123")
+	redis.InitializeRedis(time.Minute*time.Duration(5), 10, 5000, "redis-service", 6379, "frank123")
 
 	// 初始化 Mongo
 	if err := database.InitializeMongo(

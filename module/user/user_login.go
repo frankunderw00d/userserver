@@ -1,15 +1,15 @@
 package user
 
 import (
-	bSession "baseservice/base/session"
-
 	"baseservice/base/basic"
+	bSession "baseservice/base/session"
 	"baseservice/model/user"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"jarvis/base/database"
+	"jarvis/base/database/redis"
 	"jarvis/base/network"
 	uRand "jarvis/util/rand"
 	loginModel "userserver/model/user"
@@ -107,18 +107,12 @@ func login(request loginModel.LoginRequest, response *loginModel.LoginResponse) 
 
 // 将用户信息存入 redis
 func SetUserInfoToRedis(u user.User) error {
-	// 获取 Redis 连接
-	redisConn, err := database.GetRedisConn()
-	if err != nil {
-		return err
-	}
-	defer redisConn.Close()
-
 	userData, err := json.Marshal(&u)
 	if err != nil {
 		return err
 	}
 
-	_, err = redisConn.Do("hset", UsersInfoKey, UserInfoField.Compose(u.Account.Token), string(userData))
+	_, err = redis.HSet(UsersInfoKey, UserInfoField.Compose(u.Account.Token), string(userData))
+
 	return err
 }

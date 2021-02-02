@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"jarvis/base/database"
+	"jarvis/base/database/redis"
 	"jarvis/base/network"
 	loginModel "userserver/model/user"
 )
@@ -59,22 +59,15 @@ func (um *userModule) updateUserInfo(ctx network.Context) {
 }
 
 func updateUserInfo(request loginModel.UpdateRequest, response *loginModel.UpdateResponse) error {
-	// 获取 redis 链接
-	redisConn, err := database.GetRedisConn()
-	if err != nil {
-		return err
-	}
-	defer redisConn.Close()
-
 	// 新建 redis 分布式锁
-	redisLock := database.NewRedisLock()
+	redisLock := redis.NewRedisLock()
 	if err := redisLock.Initialize(); err != nil {
 		return err
 	}
 	defer redisLock.Close()
 
 	// 上锁
-	if !redisLock.UntilLock(InfoUpdateDistributedLock.Compose(request.Token),10) {
+	if !redisLock.UntilLock(InfoUpdateDistributedLock.Compose(request.Token), 10) {
 		return ErrInfoUpdateDistributedLock
 	}
 	defer redisLock.Unlock(InfoUpdateDistributedLock.Compose(request.Token))

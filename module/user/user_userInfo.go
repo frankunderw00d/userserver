@@ -5,8 +5,7 @@ import (
 	"baseservice/model/user"
 	"encoding/json"
 	"fmt"
-	redisGo "github.com/gomodule/redigo/redis"
-	"jarvis/base/database"
+	"jarvis/base/database/redis"
 	"jarvis/base/network"
 	loginModel "userserver/model/user"
 )
@@ -70,14 +69,7 @@ func getUserInfo(request loginModel.GetUserInfoRequest, response *loginModel.Get
 
 // 根据 token 从 redis 中获取用户数据
 func GetUserInfoFromRedis(token string) (user.User, error) {
-	// 获取 Redis 连接
-	redisConn, err := database.GetRedisConn()
-	if err != nil {
-		return user.User{}, err
-	}
-	defer redisConn.Close()
-
-	infoStr, err := redisGo.String(redisConn.Do("hget", UsersInfoKey, UserInfoField.Compose(token)))
+	infoStr, err := redis.HGet(UsersInfoKey, UserInfoField.Compose(token))
 	if err != nil {
 		return user.User{}, err
 	}
