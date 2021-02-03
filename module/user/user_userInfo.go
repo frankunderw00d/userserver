@@ -1,7 +1,7 @@
 package user
 
 import (
-	"baseservice/model/authenticate"
+	"baseservice/middleware/authenticate"
 	"baseservice/model/user"
 	"encoding/json"
 	"fmt"

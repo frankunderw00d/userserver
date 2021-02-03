@@ -1,6 +1,6 @@
 package user
 
-import "baseservice/model/authenticate"
+import "baseservice/middleware/authenticate"
 
 type (
 	// 获取用户信息(除了用户 vip 等级,账号余额)请求

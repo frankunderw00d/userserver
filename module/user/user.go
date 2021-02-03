@@ -1,7 +1,8 @@
 package user
 
 import (
-	"baseservice/model/authenticate"
+	"baseservice/middleware/authenticate"
+	"baseservice/middleware/traceRecord"
 	"jarvis/base/network"
 	"log"
 )
@@ -44,11 +45,13 @@ func (um *userModule) Name() string {
 // 模块要求实现函数: Route() map[string][]network.RouteHandleFunc
 func (um *userModule) Route() map[string][]network.RouteHandleFunc {
 	return map[string][]network.RouteHandleFunc{
-		"register":             {um.register},                                        // 用户注册
-		"login":                {um.login},                                           // 用户登录
-		"getUserInfo":          {authenticate.Authenticate, um.getUserInfo},          // 获取用户信息(需要校验 Session )
-		"updateUserInfo":       {authenticate.Authenticate, um.updateUserInfo},       // 更新用户信息(需要校验 Session )
-		"updateAccountBalance": {authenticate.Authenticate, um.updateAccountBalance}, // 更新用户账户余额(需要校验 Session )
+		"register":             {um.register},                                                                             // 用户注册
+		"login":                {um.login},                                                                                // 用户登录
+		"autoLogin":            {authenticate.Authenticate, traceRecord.TraceAuthenticateRecord, um.autoLogin},            // 用户自动登录(需要校验)
+		"logout":               {authenticate.Authenticate, traceRecord.TraceAuthenticateRecord, um.logout},               // 用户登出(需要校验)
+		"getUserInfo":          {authenticate.Authenticate, traceRecord.TraceAuthenticateRecord, um.getUserInfo},          // 获取用户信息(需要校验)
+		"updateUserInfo":       {authenticate.Authenticate, traceRecord.TraceAuthenticateRecord, um.updateUserInfo},       // 更新用户信息(需要校验)
+		"updateAccountBalance": {authenticate.Authenticate, traceRecord.TraceAuthenticateRecord, um.updateAccountBalance}, // 更新用户账户余额(需要校验)
 	}
 }
 

@@ -2,7 +2,7 @@ package user
 
 import (
 	"baseservice/base/basic"
-	"baseservice/model/authenticate"
+	"baseservice/middleware/authenticate"
 	"baseservice/model/user"
 	"context"
 	"encoding/json"
@@ -103,7 +103,9 @@ func updateAccountBalance(request loginModel.UpdateAccountBalanceRequest, respon
 		"amount":   request.Amount,
 		"time":     time.Now().Format("2006-01-02 15:04:05"),
 		"describe": request.Describe,
-		"user":     request.Token},
+		"user":     request.Token,
+		"type":     request.UpdateType,
+	},
 	)
 	if err != nil {
 		return err

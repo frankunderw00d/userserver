@@ -1,6 +1,7 @@
 package main
 
 import (
+	"baseservice/middleware/traceRecord"
 	"jarvis/base/database"
 	"jarvis/base/database/redis"
 	"jarvis/base/network"
@@ -68,7 +69,7 @@ func init() {
 
 func main() {
 	// 1.添加全局中间件
-	if err := service.UseMiddleware(logMiddleware); err != nil {
+	if err := service.UseMiddleware(logMiddleware, traceRecord.TraceRecord); err != nil {
 		log.Fatalf("Use middleware error : %s", err)
 		return
 	}

@@ -2,7 +2,7 @@ package user
 
 import (
 	"baseservice/base/basic"
-	"baseservice/model/authenticate"
+	"baseservice/middleware/authenticate"
 	"baseservice/model/user"
 	"encoding/json"
 	"errors"
