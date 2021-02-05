@@ -10,3 +10,4 @@ WORKDIR /opt/userserver
 COPY --from=builder /usr/src/userserver/userserver ./
 COPY --from=builder /usr/share/zoneinfo/Asia/Shanghai /usr/share/zoneinfo/Asia/
 ENV TZ=Asia/Shanghai
+CMD ["./userserver"]
