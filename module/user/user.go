@@ -3,8 +3,8 @@ package user
 import (
 	"baseservice/middleware/authenticate"
 	"baseservice/middleware/traceRecord"
+	"jarvis/base/log"
 	"jarvis/base/network"
-	"log"
 )
 
 type (
@@ -70,5 +70,5 @@ func printReplyError(err error) {
 		return
 	}
 
-	log.Printf("Reply error : %s", err.Error())
+	log.ErrorF("Reply error : %s", err.Error())
 }

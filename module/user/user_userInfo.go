@@ -4,8 +4,8 @@ import (
 	"baseservice/middleware/authenticate"
 	"baseservice/model/user"
 	"encoding/json"
-	"fmt"
 	"jarvis/base/database/redis"
+	"jarvis/base/log"
 	"jarvis/base/network"
 	loginModel "userserver/model/user"
 )
@@ -24,7 +24,7 @@ func (um *userModule) getUserInfo(ctx network.Context) {
 	// 调用函数
 	err := getUserInfo(request, response)
 	if err != nil {
-		fmt.Printf("get user info error : %s", err.Error())
+		log.ErrorF("get user info error : %s", err.Error())
 		printReplyError(ctx.ServerError(err))
 		return
 	}
@@ -35,7 +35,7 @@ func (um *userModule) getUserInfo(ctx network.Context) {
 	// 序列化响应
 	data, err := json.Marshal(response)
 	if err != nil {
-		fmt.Printf("marshal response error : %s", err.Error())
+		log.ErrorF("marshal response error : %s", err.Error())
 		printReplyError(ctx.ServerError(err))
 		return
 	}

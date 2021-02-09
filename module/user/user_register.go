@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"jarvis/base/log"
 	"jarvis/base/network"
 	"jarvis/util/rand"
 	"jarvis/util/regexp"
@@ -24,7 +25,7 @@ func (um *userModule) register(ctx network.Context) {
 	// 调用业务函数
 	err := register(request)
 	if err != nil {
-		fmt.Printf("register error : %s", err.Error())
+		log.ErrorF("register error : %s", err.Error())
 		printReplyError(ctx.ServerError(err))
 		return
 	}

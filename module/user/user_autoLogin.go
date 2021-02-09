@@ -4,7 +4,7 @@ import (
 	bSession "baseservice/common/session"
 	"baseservice/model/user"
 	"encoding/json"
-	"fmt"
+	"jarvis/base/log"
 	"jarvis/base/network"
 	uRand "jarvis/util/rand"
 	"time"
@@ -27,7 +27,7 @@ func (um *userModule) autoLogin(ctx network.Context) {
 	// 调用函数
 	err := autoLogin(request, response)
 	if err != nil {
-		fmt.Printf("login error : %s", err.Error())
+		log.ErrorF("autoLogin error : %s", err.Error())
 		printReplyError(ctx.ServerError(err))
 		return
 	}
@@ -35,7 +35,7 @@ func (um *userModule) autoLogin(ctx network.Context) {
 	// 序列化响应
 	data, err := json.Marshal(response)
 	if err != nil {
-		fmt.Printf("marshal response error : %s", err.Error())
+		log.ErrorF("marshal response error : %s", err.Error())
 		printReplyError(ctx.ServerError(err))
 		return
 	}

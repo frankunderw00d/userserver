@@ -7,10 +7,10 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"jarvis/base/database"
 	"jarvis/base/database/redis"
+	"jarvis/base/log"
 	"jarvis/base/network"
 	"time"
 	loginModel "userserver/model/user"
@@ -41,7 +41,7 @@ func (um *userModule) updateAccountBalance(ctx network.Context) {
 	// 调用函数
 	err := updateAccountBalance(request, response)
 	if err != nil {
-		fmt.Printf("update account balance error : %s", err.Error())
+		log.ErrorF("update account balance error : %s", err.Error())
 		printReplyError(ctx.ServerError(err))
 		return
 	}
@@ -52,7 +52,7 @@ func (um *userModule) updateAccountBalance(ctx network.Context) {
 	// 序列化响应
 	data, err := json.Marshal(response)
 	if err != nil {
-		fmt.Printf("marshal response error : %s", err.Error())
+		log.ErrorF("marshal response error : %s", err.Error())
 		printReplyError(ctx.ServerError(err))
 		return
 	}

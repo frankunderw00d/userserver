@@ -4,8 +4,8 @@ import (
 	"baseservice/middleware/traceRecord"
 	"jarvis/base/database"
 	"jarvis/base/database/redis"
+	"jarvis/base/log"
 	"jarvis/base/network"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -45,7 +45,7 @@ func init() {
 		3306,
 		"jarvis",
 	); err != nil {
-		log.Panicf("Initialize MySQL error : %s", err.Error())
+		log.FatalF("Initialize MySQL error : %s", err.Error())
 		return
 	}
 
@@ -62,7 +62,7 @@ func init() {
 		"jarvis",
 		"mongo-service",
 		27017, time.Minute*time.Duration(5), 5000); err != nil {
-		log.Panicf("Initialize Mongo error : %s", err.Error())
+		log.FatalF("Initialize Mongo error : %s", err.Error())
 		return
 	}
 }
@@ -70,19 +70,19 @@ func init() {
 func main() {
 	// 1.添加全局中间件
 	if err := service.UseMiddleware(logMiddleware, traceRecord.TraceRecord); err != nil {
-		log.Fatalf("Use middleware error : %s", err)
+		log.ErrorF("Use middleware error : %s", err)
 		return
 	}
 
 	// 2.注册观察者
 	if err := service.RegisterObserver(user.NewObserver()); err != nil {
-		log.Fatalf("Register observer error : %s", err)
+		log.ErrorF("Register observer error : %s", err)
 		return
 	}
 
 	// 3.注册模块
 	if err := service.RegisterModule(user.NewModule()); err != nil {
-		log.Fatalf("Register module error : %s", err)
+		log.ErrorF("Register module error : %s", err)
 		return
 	}
 
@@ -92,7 +92,7 @@ func main() {
 		network.NewWebSocketGate(WebSocketListenAddress), // WebSocket 入口
 		network.NewGRPCGate(GRPCListenAddress),           // gRPC 入口
 	); err != nil {
-		log.Fatalf("Register observer error : %s", err)
+		log.ErrorF("Register observer error : %s", err)
 		return
 	}
 
@@ -107,11 +107,11 @@ func monitorSystemSignal() {
 	signal.Notify(sc, syscall.SIGQUIT)
 	select {
 	case <-sc:
-		log.Println("Done")
+		log.InfoF("Done")
 	}
 }
 
 // 打印中间件
 func logMiddleware(ctx network.Context) {
-	log.Printf("%+v", ctx.Request())
+	log.InfoF("%+v", ctx.Request())
 }

@@ -6,8 +6,8 @@ import (
 	"baseservice/model/user"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"jarvis/base/database/redis"
+	"jarvis/base/log"
 	"jarvis/base/network"
 	loginModel "userserver/model/user"
 )
@@ -38,7 +38,7 @@ func (um *userModule) updateUserInfo(ctx network.Context) {
 	// 调用函数
 	err := updateUserInfo(request, response)
 	if err != nil {
-		fmt.Printf("update user info error : %s", err.Error())
+		log.ErrorF("update user info error : %s", err.Error())
 		printReplyError(ctx.ServerError(err))
 		return
 	}
@@ -49,7 +49,7 @@ func (um *userModule) updateUserInfo(ctx network.Context) {
 	// 序列化响应
 	data, err := json.Marshal(response)
 	if err != nil {
-		fmt.Printf("marshal response error : %s", err.Error())
+		log.ErrorF("marshal response error : %s", err.Error())
 		printReplyError(ctx.ServerError(err))
 		return
 	}
