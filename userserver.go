@@ -2,6 +2,7 @@ package main
 
 import (
 	"baseservice/middleware/traceRecord"
+	"io"
 	"jarvis/base/database"
 	"jarvis/base/database/redis"
 	"jarvis/base/log"
@@ -11,6 +12,7 @@ import (
 	"syscall"
 	"time"
 	"userserver/module/user"
+	"userserver/utils/logHook"
 )
 
 const (
@@ -24,13 +26,25 @@ const (
 	WebSocketListenAddress = ":8081"
 	// gRPC 监听地址
 	GRPCListenAddress = ":8082"
+	// 远程日志聚合地址
+	LogRemoteAddress = ":10000"
 )
 
 var (
 	service network.Service
+	lh      io.WriteCloser
 )
 
 func init() {
+	// 新建远程日志钩子
+	nlh, err := logHook.NewRemoteHook(LogRemoteAddress)
+	if err != nil {
+		log.FatalF("New remote hook error : %s", err.Error())
+		return
+	}
+	lh = nlh
+	log.SetHook(lh)
+
 	// 实例化服务
 	service = network.NewService(
 		CustomMaxConnection,
@@ -107,6 +121,7 @@ func monitorSystemSignal() {
 	signal.Notify(sc, syscall.SIGQUIT)
 	select {
 	case <-sc:
+		_ = lh.Close()
 		log.InfoF("Done")
 	}
 }
