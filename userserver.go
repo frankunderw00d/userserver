@@ -1,6 +1,7 @@
 package main
 
 import (
+	"baseservice/common/remoteLogHook"
 	"baseservice/middleware/traceRecord"
 	"io"
 	"jarvis/base/database"
@@ -12,7 +13,6 @@ import (
 	"syscall"
 	"time"
 	"userserver/module/user"
-	"userserver/utils/logHook"
 )
 
 const (
@@ -27,7 +27,7 @@ const (
 	// gRPC 监听地址
 	GRPCListenAddress = ":8082"
 	// 远程日志聚合地址
-	LogRemoteAddress = ":10000"
+	LogRemoteAddress = "logserver:10000"
 )
 
 var (
@@ -37,7 +37,7 @@ var (
 
 func init() {
 	// 新建远程日志钩子
-	nlh, err := logHook.NewRemoteHook(LogRemoteAddress)
+	nlh, err := remoteLogHook.NewSocketRemoteHook(LogRemoteAddress)
 	if err != nil {
 		log.FatalF("New remote hook error : %s", err.Error())
 		return
