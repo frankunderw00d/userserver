@@ -27,7 +27,7 @@ const (
 	// gRPC 监听地址
 	GRPCListenAddress = ":8082"
 	// 远程日志聚合地址
-	LogRemoteAddress = "logserver:10000"
+	LogSocketRemoteAddress = "logserver:10000"
 )
 
 var (
@@ -37,7 +37,7 @@ var (
 
 func init() {
 	// 新建远程日志钩子
-	nlh, err := remoteLogHook.NewSocketRemoteHook(LogRemoteAddress)
+	nlh, err := remoteLogHook.NewSocketRemoteHook(LogSocketRemoteAddress)
 	if err != nil {
 		log.FatalF("New remote hook error : %s", err.Error())
 		return
@@ -121,8 +121,8 @@ func monitorSystemSignal() {
 	signal.Notify(sc, syscall.SIGQUIT)
 	select {
 	case <-sc:
-		_ = lh.Close()
 		log.InfoF("Done")
+		_ = lh.Close()
 	}
 }
 
